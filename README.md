@@ -27,3 +27,4 @@ This is my first software with rust, so it has a lot of stuff that is wrong xD.
 - [ ] Add release group preference
 - [ ] Use anilist notifications instead of the current solution
 - [ ] Clean up a little bit
+- [ ] Loggin stuff (priority)
