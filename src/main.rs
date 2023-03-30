@@ -31,7 +31,7 @@ struct Config {
     qbittorrent_url: String,
     torrent_category: String,
     torrent_savepath: String,
-    anilist_username: String,
+    anilist_token: String,
 }
 
 fn main() {
@@ -80,7 +80,7 @@ fn check_list(config: &Config) {
     let dur = std::time::Duration::from_secs(5 * 60);
     loop {
         let currently_watching =
-            anilist::get_users_shows(config.anilist_username.to_owned()).unwrap();
+            anilist::get_new_releases(config.anilist_token.to_owned()).unwrap();
         let nyaa_feed = tracker::get_feed_items().unwrap();
         for c in currently_watching {
             try_download(
@@ -109,7 +109,7 @@ fn init_config(path: &str) {
     let mut qbittorrent_url = String::new();
     let mut torrent_category = String::new();
     let mut torrent_savepath = String::new();
-    let mut anilist_username = String::new();
+    let mut anilist_token = String::new();
 
     println!("URL for the qbittorrent web ui (Example: http://localhost:8080/):");
     std::io::stdin()
@@ -126,22 +126,22 @@ fn init_config(path: &str) {
         .read_line(&mut torrent_savepath)
         .expect("Failed to read input");
 
-    println!("Enter your anilist username:");
+    println!("Enter your anilist token:");
     std::io::stdin()
-        .read_line(&mut anilist_username)
+        .read_line(&mut anilist_token)
         .expect("Failed to read input");
 
     let config = Config {
         qbittorrent_url: qbittorrent_url.trim().to_owned(),
         torrent_category: torrent_category.trim().to_owned(),
         torrent_savepath: torrent_savepath.trim().to_owned(),
-        anilist_username: anilist_username.trim().to_owned(),
+        anilist_token: anilist_token.trim().to_owned(),
     };
 
     let json = serde_json::to_string(&config).unwrap();
 
     let config_path = format!("{}config.json", path);
-    torrent::ensure_path(&config_path);
+    torrent::ensure_path(&path);
     std::fs::write(&config_path, json).expect("Failed to write config");
 
     println!("Done! You can edit your settings later at .config/weeb_helper");
