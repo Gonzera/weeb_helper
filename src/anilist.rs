@@ -65,7 +65,7 @@ pub fn get_new_releases(token: String) -> Option<Vec<Show>> {
     {
         Ok(response) => response,
         Err(error) => {
-            println!("get_new_releases failed with error: {}", error);
+            eprintln!("get_new_releases failed with error: {}", error);
             return None;
         }
     };
