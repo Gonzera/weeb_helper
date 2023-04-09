@@ -68,7 +68,11 @@ fn get_tracker_feed() -> Result<String, &'static str> {
 
 // TODO: Refactor this
 pub fn get_feed_items() -> Result<Vec<TrackerItem>, &'static str> {
-    let feed: String = get_tracker_feed().unwrap();
+    let feed: String = match get_tracker_feed() {
+        Ok(feed) => feed,
+        Err(_) => return Err("Failed to get feed from tracker"),
+    };
+
     let mut items: Vec<TrackerItem> = Vec::new();
     let mut reader = Reader::from_str(&feed);
     reader.trim_text(true);

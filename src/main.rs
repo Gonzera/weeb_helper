@@ -62,6 +62,10 @@ fn main() {
             }
         }
         check_list(&config);
+    } else {
+        // idk runs it
+        let config: Config = read_config(&config_path);
+        check_list(&config);
     }
 }
 
@@ -79,16 +83,21 @@ fn check_list(config: &Config) {
     // Checks the list for new releases in a endless loop
     let dur = std::time::Duration::from_secs(5 * 60);
     loop {
-        let currently_watching =
-            anilist::get_new_releases(config.anilist_token.to_owned()).unwrap();
-        let nyaa_feed = tracker::get_feed_items().unwrap();
-        for c in currently_watching {
-            try_download(
-                &nyaa_feed,
-                &c,
-                config.qbittorrent_url.as_str(),
-                config.torrent_savepath.as_str(),
-            );
+        let currently_watching = anilist::get_new_releases(config.anilist_token.to_owned());
+        if currently_watching.is_some() {
+            match tracker::get_feed_items() {
+                Ok(nyaa_feed) => {
+                    for c in currently_watching.unwrap() {
+                        try_download(
+                            &nyaa_feed,
+                            &c,
+                            config.qbittorrent_url.as_str(),
+                            config.torrent_savepath.as_str(),
+                        );
+                    }
+                }
+                Err(_) => (),
+            }
         }
         std::thread::sleep(dur);
     }
