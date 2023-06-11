@@ -14,3 +14,5 @@ quick-xml = "0.27.1"
 clap = { version = "4.1.8", features = ["derive"] }
 daemonize = "0.5.0"
 simple_logger = { version = "4.1.0", features = ["timestamps"] }
+regex = "1"
+

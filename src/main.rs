@@ -8,6 +8,7 @@ extern crate daemonize;
 use anilist::Show;
 use clap::Parser;
 use daemonize::Daemonize;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs::{File, OpenOptions};
@@ -159,9 +160,11 @@ fn init_config(path: &str) {
 fn try_download(items: &Vec<TrackerItem>, show: &Show, url: &str, savepath: &str) {
     for item in items {
         if item.parsed_title.is_some() && item.parsed_episode.is_some() {
-            let p_title: &str = &item.parsed_title.as_ref().unwrap();
+            let p_title: String = clean_string(&item.parsed_title.as_ref().unwrap());
+            let clean_english_title = clean_string(show.title.english.as_str());
+            let clean_romaji_title = clean_string(show.title.romaji.as_str());
             let p_ep: &str = &item.parsed_episode.as_ref().unwrap();
-            if &show.title.english == p_title || &show.title.romaji == p_title {
+            if clean_english_title == p_title || clean_romaji_title == p_title {
                 if show.should_download
                     && !already_downloaded(
                         &show.title.romaji,
@@ -174,6 +177,15 @@ fn try_download(items: &Vec<TrackerItem>, show: &Show, url: &str, savepath: &str
             }
         }
     }
+}
+
+fn clean_string(str: &str) -> String {
+    let pattern = Regex::new(r"[^a-zA-Z0-9\s]").unwrap();
+
+    // Replace all occurrences of the pattern with an empty string
+    let clean = pattern.replace_all(str, "").into_owned();
+
+    clean.to_lowercase()
 }
 
 fn already_downloaded(title: &str, ep: &str) -> bool {
