@@ -164,6 +164,7 @@ fn try_download(items: &Vec<TrackerItem>, show: &Show, url: &str, savepath: &str
             let clean_english_title = clean_string(show.title.english.as_str());
             let clean_romaji_title = clean_string(show.title.romaji.as_str());
             let p_ep: &str = &item.parsed_episode.as_ref().unwrap();
+            // TODO: do this based on string distance?
             if clean_english_title == p_title || clean_romaji_title == p_title {
                 if show.should_download
                     && !already_downloaded(
@@ -183,7 +184,8 @@ fn clean_string(str: &str) -> String {
     let pattern = Regex::new(r"[^a-zA-Z0-9\s]").unwrap();
 
     // Replace all occurrences of the pattern with an empty string
-    let clean = pattern.replace_all(str, "").into_owned();
+    let mut clean = pattern.replace_all(str, "").into_owned();
+    clean = clean.replace(" ", "");
 
     clean.to_lowercase()
 }
