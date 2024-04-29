@@ -164,8 +164,8 @@ fn try_download(items: &Vec<TrackerItem>, show: &Show, url: &str, savepath: &str
             let english_title = show.title.english.as_str();
             let romaji_title = show.title.romaji.as_str();
             let p_ep: &str = &item.parsed_episode.as_ref().unwrap();
-            if string_distance::calc_similarity(english_title, p_title) > 80.0
-                || string_distance::calc_similarity(romaji_title, p_title) > 80.0
+            if string_distance::calc_similarity(english_title, p_title) > 75.0
+                || string_distance::calc_similarity(romaji_title, p_title) > 75.0
             {
                 if show.should_download
                     && !already_downloaded(
