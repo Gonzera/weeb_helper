@@ -1,4 +1,5 @@
 mod anilist;
+mod string_distance;
 mod torrent;
 mod tracker;
 
@@ -8,7 +9,6 @@ extern crate daemonize;
 use anilist::Show;
 use clap::Parser;
 use daemonize::Daemonize;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs::{File, OpenOptions};
@@ -160,12 +160,13 @@ fn init_config(path: &str) {
 fn try_download(items: &Vec<TrackerItem>, show: &Show, url: &str, savepath: &str) {
     for item in items {
         if item.parsed_title.is_some() && item.parsed_episode.is_some() {
-            let p_title: String = clean_string(&item.parsed_title.as_ref().unwrap());
-            let clean_english_title = clean_string(show.title.english.as_str());
-            let clean_romaji_title = clean_string(show.title.romaji.as_str());
+            let p_title = &item.parsed_title.as_ref().unwrap().as_str();
+            let english_title = show.title.english.as_str();
+            let romaji_title = show.title.romaji.as_str();
             let p_ep: &str = &item.parsed_episode.as_ref().unwrap();
-            // TODO: do this based on string distance?
-            if clean_english_title == p_title || clean_romaji_title == p_title {
+            if string_distance::calc_similarity(english_title, p_title) > 80.0
+                || string_distance::calc_similarity(romaji_title, p_title) > 80.0
+            {
                 if show.should_download
                     && !already_downloaded(
                         &show.title.romaji,
@@ -178,16 +179,6 @@ fn try_download(items: &Vec<TrackerItem>, show: &Show, url: &str, savepath: &str
             }
         }
     }
-}
-
-fn clean_string(str: &str) -> String {
-    let pattern = Regex::new(r"[^a-zA-Z0-9\s]").unwrap();
-
-    // Replace all occurrences of the pattern with an empty string
-    let mut clean = pattern.replace_all(str, "").into_owned();
-    clean = clean.replace(" ", "");
-
-    clean.to_lowercase()
 }
 
 fn already_downloaded(title: &str, ep: &str) -> bool {
