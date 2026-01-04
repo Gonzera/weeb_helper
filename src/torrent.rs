@@ -11,11 +11,16 @@ pub fn ensure_path(path: &str) {
     }
 }
 
+fn sanitize_title(name: &str) -> String {
+    name.replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], "-")
+}
+
 pub fn add_torrent(title: &str, download_url: &str, savepath: &str, url: &str) {
     let client = reqwest::blocking::Client::new();
     let url: String = format!("{}{}", url, "api/v2/torrents/add");
     println!("{}", url);
-    let path: String = format!("{}{}", savepath, title);
+    let clean_title = sanitize_title(title);
+    let path: String = format!("{}{}", savepath, &clean_title);
     ensure_path(&path);
     let form_data = [
         ("urls", download_url),
